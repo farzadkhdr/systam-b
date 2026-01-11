@@ -1,44 +1,52 @@
 // فەنکشنی API بۆ وەرگرتنی داتا لە سیستەمی A
 // لەسەر Vercel Serverless Functions
 
-// ئەمە بۆ هەڵگرتنی داتاکان لە یادگادا (لە ڕاستیدا دەبێت داتابەیس بەکاربهێنیت)
 let receivedData = [];
 
 export default async function handler(req, res) {
-    // چاوەڕوانی POST لە سیستەمی A و GET لە کلایەنتەکە
+    // زیادکردنی CORS headers
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+    res.setHeader(
+        'Access-Control-Allow-Headers',
+        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, X-System-A-Key'
+    );
+    
+    // چارەسەری CORS preflight
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+    
     if (req.method === 'POST') {
-        // وەرگرتنی داتا لە سیستەمی A
         try {
             const data = req.body;
             
-            // چەککردنی کلیلی ئاسایش (ئەگەر بونی هەبێت)
-            const authHeader = req.headers['x-system-a-key'];
-            const expectedKey = 'system-a-secret-key-12345'; // هەمان کلیلی سیستەمی A
+            console.log('وەرگرتنی POST لە:', req.headers.origin);
+            console.log('داتا:', { name: data.name, email: data.email });
             
-            if (authHeader !== expectedKey) {
-                console.warn('کلیلی نادروستی ئاسایش لە سیستەمی A');
-                // دەتوانیت وەڵامی ڕەتکردنەوە بدەیتەوە یان ڕێگەبدەیت
-                // return res.status(401).json({ error: 'کلیلی نادروست' });
+            // چەککردنی داتا
+            if (!data.name || !data.email || !data.message) {
+                return res.status(400).json({ 
+                    success: false,
+                    error: 'ناو، ئیمەیڵ و پەیام پێویستە' 
+                });
             }
             
             // زیادکردنی نیشانەی کاتی وەرگرتن
             data.receivedAt = new Date().toISOString();
             data.receivedBySystemB = true;
-            data.id = Date.now(); // نیشانەی تاک
+            data.id = Date.now();
             
             // زیادکردنی داتاکە بۆ لیستەکە
             receivedData.unshift(data);
             
-            // سنووردارکردنی لیستەکە بۆ 50 تۆمار (بۆ نەهێشتنەوەی زۆر)
+            // سنووردارکردنی لیستەکە بۆ 50 تۆمار
             if (receivedData.length > 50) {
                 receivedData = receivedData.slice(0, 50);
             }
             
-            console.log('داتای وەرگیراو لە سیستەمی A:', {
-                name: data.name,
-                email: data.email,
-                timestamp: data.receivedAt
-            });
+            console.log('داتای وەرگیراو لە سیستەمی A:', data.name);
             
             // وەڵامی سەرکەوتوو
             return res.status(200).json({
@@ -46,19 +54,21 @@ export default async function handler(req, res) {
                 message: 'زانیاریەکان بە سەرکەوتووی وەرگیران',
                 receivedData: data,
                 totalReceived: receivedData.length,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                note: 'لە سیستەمی Bەوە وەرگیرا'
             });
             
         } catch (error) {
             console.error('هەڵە لە وەرگرتنی داتا:', error);
             return res.status(500).json({ 
-                error: 'هەڵەی ناوەخۆیی سرڤەر لە وەرگرتنی داتا',
+                success: false,
+                error: 'هەڵەی ناوەخۆیی سرڤەر',
                 details: error.message 
             });
         }
         
     } else if (req.method === 'GET') {
-        // گەڕاندنەوەی داتاکانی وەرگیراو بۆ نمایشکردن لە پەڕەکەدا
+        // گەڕاندنەوەی داتاکانی وەرگیراو
         return res.status(200).json({
             success: true,
             message: 'داتاکانی وەرگیراو',
@@ -70,7 +80,9 @@ export default async function handler(req, res) {
         });
         
     } else {
-        // ڕێگەپێنەدراو
-        return res.status(405).json({ error: 'تەنها POST یان GET ڕێگادەپێدرێت' });
+        return res.status(405).json({ 
+            success: false,
+            error: 'تەنها POST یان GET ڕێگادەپێدرێت' 
+        });
     }
 }
