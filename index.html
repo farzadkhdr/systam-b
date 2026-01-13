@@ -140,6 +140,7 @@
             margin-top: 30px;
             color: #666;
             font-size: 14px;
+            text-align: center;
         }
         
         .api-url {
@@ -173,6 +174,28 @@
         .refresh-btn:active {
             transform: translateY(0);
         }
+        
+        .system-status {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .status-active {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-loading {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
     </style>
 </head>
 <body>
@@ -190,7 +213,9 @@
                 <div class="stat-label">دوایین وەرگێڕان</div>
             </div>
             <div class="stat-box">
-                <div class="stat-value" id="systemStatus">چالاکە</div>
+                <div class="stat-value">
+                    <span id="systemStatus" class="system-status status-active">چالاکە</span>
+                </div>
                 <div class="stat-label">بارودۆخی سیستەم</div>
             </div>
         </div>
@@ -209,6 +234,9 @@
             <div class="api-url">
                 API وەرگرتن: <span id="apiUrl">/api/receive-data</span>
             </div>
+            <p style="margin-top: 15px; font-size: 12px; color: #888;">
+                پەیوەندیدارە بە: <span id="systemAUrl">سیستەمی A</span>
+            </p>
         </div>
     </div>
 
