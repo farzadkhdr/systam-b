@@ -1,7 +1,5 @@
 // فەنکشنی API بۆ وەرگرتنی داتا لە سیستەمی A
 
-// داتاکان لە یادگادا هەڵدەگرین (لەم نموونەدا بەکاردەهێنین بۆ نمایش)
-// لە کۆدی ڕاستەقینەدا پێویستە داتابەیس بەکاربێنی
 let receivedData = [];
 
 export default async function handler(req, res) {
@@ -22,8 +20,7 @@ export default async function handler(req, res) {
         try {
             const data = req.body;
             
-            console.log('وەرگرتنی POST لە سیستەمی A:', req.headers.origin);
-            console.log('داتا:', { name: data.name, email: data.email });
+            console.log('وەرگرتنی POST لە سیستەمی A');
             
             // چەککردنی داتا
             if (!data.name || !data.email || !data.message) {
@@ -46,7 +43,7 @@ export default async function handler(req, res) {
                 receivedData = receivedData.slice(0, 50);
             }
             
-            console.log('داتای وەرگیراو لە سیستەمی A:', data.name);
+            console.log('داتای وەرگیراو:', data.name);
             
             // وەڵامی سەرکەوتوو
             return res.status(200).json({
