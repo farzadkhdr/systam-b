@@ -7,17 +7,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const systemStatus = document.getElementById('systemStatus');
     const refreshBtn = document.getElementById('refreshBtn');
     const apiUrlElement = document.getElementById('apiUrl');
-    const systemAUrlElement = document.getElementById('systemAUrl');
     
     // نمایشکردنی ئەدرێسی API لەسەر پەڕەکە
     const currentUrl = window.location.origin;
     apiUrlElement.textContent = `${currentUrl}/api/receive-data`;
-    
-    // ئەدرێسی سیستەمی A (دەتوانی بگۆڕی)
-    // لەم نموونەدا، سیستەمی A لەسەر هەمان دۆمەینە بەڵام دەتوانی بگۆڕی
-    // بۆ نمونە: https://system-a.vercel.app
-    const systemAUrl = currentUrl.replace('systam-b', 'system-a') || 'سیستەمی A';
-    systemAUrlElement.textContent = systemAUrl;
     
     // بارکردنی زانیاریەکان لە سەرەتاوە
     loadReceivedData();
