@@ -1,6 +1,7 @@
 {
   "name": "system-b",
   "version": "1.0.0",
+  "description": "سیستەمی وەرگرتنی زانیاری",
   "engines": {
     "node": "18.x"
   }
