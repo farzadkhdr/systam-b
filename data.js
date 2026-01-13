@@ -7,7 +7,7 @@ export default async function handler(req, res) {
     // زیادکردنی CORS headers
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
     res.setHeader(
         'Access-Control-Allow-Headers',
         'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, X-System-A-Key'
@@ -22,7 +22,7 @@ export default async function handler(req, res) {
         try {
             const data = req.body;
             
-            console.log('وەرگرتنی POST لە:', req.headers.origin);
+            console.log('وەرگرتنی POST لە سیستەمی A:', req.headers.origin);
             console.log('داتا:', { name: data.name, email: data.email });
             
             // چەککردنی داتا
@@ -33,10 +33,17 @@ export default async function handler(req, res) {
                 });
             }
             
+            // پشکنینی کلیلی ئاسایش (ئارەزوومەندە)
+            const systemAKey = req.headers['x-system-a-key'];
+            if (systemAKey !== 'system-a-secret-key-12345') {
+                console.warn('کلیلی نادروستی سیستەمی A:', systemAKey);
+                // بەڵام هەر وەردەگرین بۆ نموونە
+            }
+            
             // زیادکردنی نیشانەی کاتی وەرگرتن
             data.receivedAt = new Date().toISOString();
             data.receivedBySystemB = true;
-            data.id = Date.now();
+            data.id = data.id || Date.now();
             
             // زیادکردنی داتاکە بۆ لیستەکە
             receivedData.unshift(data);
