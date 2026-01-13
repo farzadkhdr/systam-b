@@ -1,7 +1,6 @@
 {
   "rewrites": [
-    { "source": "/", "destination": "/index.html" },
-    { "source": "/api/receive-data", "destination": "/api/receive-data.js" }
+    { "source": "/", "destination": "/index.html" }
   ],
   "headers": [
     {
