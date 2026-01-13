@@ -7,10 +7,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const systemStatus = document.getElementById('systemStatus');
     const refreshBtn = document.getElementById('refreshBtn');
     const apiUrlElement = document.getElementById('apiUrl');
+    const systemAUrlElement = document.getElementById('systemAUrl');
     
     // نمایشکردنی ئەدرێسی API لەسەر پەڕەکە
     const currentUrl = window.location.origin;
     apiUrlElement.textContent = `${currentUrl}/api/receive-data`;
+    
+    // ئەدرێسی سیستەمی A (دەتوانی بگۆڕی)
+    // لەم نموونەدا، سیستەمی A لەسەر هەمان دۆمەینە بەڵام دەتوانی بگۆڕی
+    // بۆ نمونە: https://system-a.vercel.app
+    const systemAUrl = currentUrl.replace('systam-b', 'system-a') || 'سیستەمی A';
+    systemAUrlElement.textContent = systemAUrl;
     
     // بارکردنی زانیاریەکان لە سەرەتاوە
     loadReceivedData();
@@ -21,8 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // بارکردنی زانیاریە وەرگێڕدراوەکان
     async function loadReceivedData() {
         try {
-            systemStatus.textContent = 'بارکردن...';
-            systemStatus.style.color = '#ff9800';
+            setSystemStatus('بارکردن...', 'loading');
             
             const response = await fetch('/api/receive-data');
             
@@ -32,25 +38,28 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const data = await response.json();
             
-            // نوێکردنەوەی ئامارەکان
-            totalReceived.textContent = data.receivedCount || 0;
-            lastReceived.textContent = data.lastReceived ? formatTime(data.lastReceived) : '-';
-            
-            // نمایشکردنی زانیاریەکان
-            displayData(data.receivedData || []);
-            
-            // نوێکردنەوەی بارودۆخی سیستەم
-            systemStatus.textContent = 'چالاکە';
-            systemStatus.style.color = '#4caf50';
+            if (data.success) {
+                // نوێکردنەوەی ئامارەکان
+                totalReceived.textContent = data.receivedCount || 0;
+                lastReceived.textContent = data.lastReceived ? formatTime(data.lastReceived) : '-';
+                
+                // نمایشکردنی زانیاریەکان
+                displayData(data.receivedData || []);
+                
+                // نوێکردنەوەی بارودۆخی سیستەم
+                setSystemStatus('چالاکە', 'active');
+            } else {
+                throw new Error(data.error || 'کێشەیەک لە وەڵامەکەدا هەیە');
+            }
             
         } catch (error) {
             console.error('هەڵە لە بارکردنی داتاکان:', error);
-            systemStatus.textContent = 'کێشەی پەیوەندی';
-            systemStatus.style.color = '#f44336';
+            setSystemStatus('کێشەی پەیوەندی', 'error');
             
             dataList.innerHTML = `
                 <div class="no-data" style="color: #f44336;">
-                    هەڵە لە بارکردنی زانیاریەکان: ${error.message}
+                    هەڵە لە بارکردنی زانیاریەکان: ${error.message}<br>
+                    تکایە دووبارە هەوڵ بدەوە
                 </div>
             `;
         }
@@ -66,21 +75,28 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // ڕیزکردنی بەپێی کات (نوێترین لەسەرەوە)
-        const sortedData = [...dataArray].sort((a, b) => 
-            new Date(b.timestamp || b.sentAt) - new Date(a.timestamp || a.sentAt)
-        );
+        const sortedData = [...dataArray].sort((a, b) => {
+            const timeA = a.receivedAt || a.sentAt || a.timestamp;
+            const timeB = b.receivedAt || b.sentAt || b.timestamp;
+            return new Date(timeB) - new Date(timeA);
+        });
         
         let html = '';
         
         sortedData.forEach(item => {
+            const displayTime = item.receivedAt || item.sentAt || item.timestamp;
+            const email = item.email || 'بێ ئیمەیڵ';
+            const message = item.message || 'بێ پەیام';
+            const name = item.name || 'بێ ناو';
+            
             html += `
                 <div class="data-item">
                     <div class="data-header">
-                        <div class="data-name">${item.name || 'بێ ناو'}</div>
-                        <div class="data-time">${formatTime(item.timestamp || item.sentAt)}</div>
+                        <div class="data-name">${name}</div>
+                        <div class="data-time">${formatTime(displayTime)}</div>
                     </div>
-                    <div class="data-email">${item.email || 'بێ ئیمەیڵ'}</div>
-                    <div class="data-message">${item.message || 'بێ پەیام'}</div>
+                    <div class="data-email">${email}</div>
+                    <div class="data-message">${message}</div>
                 </div>
             `;
         });
@@ -117,4 +133,21 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     }
+    
+    // دانانی بارودۆخی سیستەم
+    function setSystemStatus(text, type) {
+        systemStatus.textContent = text;
+        systemStatus.className = 'system-status';
+        
+        if (type === 'active') {
+            systemStatus.classList.add('status-active');
+        } else if (type === 'loading') {
+            systemStatus.classList.add('status-loading');
+        } else if (type === 'error') {
+            systemStatus.classList.add('status-error');
+        }
+    }
+    
+    // نوێکردنەوەی ئۆتۆماتیکی هەر 30 چرکە جارێک
+    setInterval(loadReceivedData, 30000);
 });
