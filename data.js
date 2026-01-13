@@ -1,11 +1,11 @@
 // فەنکشنی API بۆ وەرگرتنی داتا لە سیستەمی A
-// لەسەر Vercel Serverless Functions
 
+// داتاکان لە یادگادا هەڵدەگرین (لەم نموونەدا بەکاردەهێنین بۆ نمایش)
+// لە کۆدی ڕاستەقینەدا پێویستە داتابەیس بەکاربێنی
 let receivedData = [];
 
 export default async function handler(req, res) {
     // زیادکردنی CORS headers
-    res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
     res.setHeader(
@@ -31,13 +31,6 @@ export default async function handler(req, res) {
                     success: false,
                     error: 'ناو، ئیمەیڵ و پەیام پێویستە' 
                 });
-            }
-            
-            // پشکنینی کلیلی ئاسایش (ئارەزوومەندە)
-            const systemAKey = req.headers['x-system-a-key'];
-            if (systemAKey !== 'system-a-secret-key-12345') {
-                console.warn('کلیلی نادروستی سیستەمی A:', systemAKey);
-                // بەڵام هەر وەردەگرین بۆ نموونە
             }
             
             // زیادکردنی نیشانەی کاتی وەرگرتن
