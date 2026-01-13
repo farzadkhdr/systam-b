@@ -26,6 +26,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const response = await fetch('/api/receive-data');
             
             if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error('API نەدۆزرایەوە (404). تکایە دڵنیابە لەوەی فەنکشنی API ڕێکخراوە.');
+                }
                 throw new Error(`وەڵامی HTTP: ${response.status}`);
             }
             
@@ -49,10 +52,19 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('هەڵە لە بارکردنی داتاکان:', error);
             setSystemStatus('کێشەی پەیوەندی', 'error');
             
+            // نمایشکردنی هەڵە بە شێوەیەکی ڕوون
+            let errorMessage = error.message;
+            if (errorMessage.includes('404')) {
+                errorMessage += '<br><br><strong>چارەسەری کێشە:</strong><br>';
+                errorMessage += '1. دڵنیابە لەوەی فایلی `/api/receive-data.js` لە شوێنی ڕاستدایت<br>';
+                errorMessage += '2. دڵنیابە لەوەی `package.json` فایلت هەیە<br>';
+                errorMessage += '3. دووبارە Deployment بکە لە Vercel';
+            }
+            
             dataList.innerHTML = `
-                <div class="no-data" style="color: #f44336;">
-                    هەڵە لە بارکردنی زانیاریەکان: ${error.message}<br>
-                    تکایە دووبارە هەوڵ بدەوە
+                <div class="no-data" style="color: #f44336; text-align: center; padding: 20px;">
+                    <strong>هەڵە لە بارکردنی زانیاریەکان:</strong><br>
+                    ${errorMessage}
                 </div>
             `;
         }
